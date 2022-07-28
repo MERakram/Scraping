@@ -4,34 +4,48 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from jumia_model import Brand
+import re
 
 brands = [
     Brand('amir', 1),
     Brand('bingo', 1),
-    Brand('bref', 1),
-    Brand('brand-brilex', 1),
     Brand('force-xpress', 1),
     Brand('life', 1),
+    Brand('omo', 1),
     Brand('test', 1),
-
+    Brand('topsil', 1),
 ]
+brands_list=[]
 
-# url = 'https://www.jumia.dz/jus-boissons-bebe/?page='
-# url='https://www.jumia.dz/epicerie-eau-javel/'+ Brand.name +'/#catalog-listing'
+base_url='https://www.jumia.dz/'
+url2=base_url+'ingredients-cuisson-epices/'
 
-columns = {'product_type':[],'category':[],'sub_category':[],'brand':[],'name': [], 'price': [],'old_price':[],'percentage':[], 'img url': [],}
-def look_for_brands(brands):
-    for Brand in brands:
-        print('---', Brand.name, '---')
-        url='https://www.jumia.dz/epicerie-eau-javel/'+ Brand.name +'/#catalog-listing'
-        for page in range(1, Brand.pages+1):
+columns = {'product_type': [], 'category': [],
+           'sub_category': [],
+           'sub_sub_category': [],
+           'brand': [], 'name': [],'price': [],
+           'old_price': [], 'percentage': [], 'img url': [], }
+
+def look_for_brands():
+    r2 = requests.get(url2)
+    soup2 = BeautifulSoup(r2.content, "html.parser")
+    ancher3 = soup2.find('div',class_=re.compile(
+        "-phs -pvxs -df -d-co")).find_all('a', {'class': 'fk-cb -me-start -fsh0'}, href=True)
+    for pt in ancher3:
+        brands_list.append(pt.attrs['href'])
+def look_for_products(brands_list):
+    for brand in brands_list:
+        print('---', brand, '---')
+        url = base_url+brand
+        for page in range(1, 2):
             print('---', page, '---')
             r = requests.get(url + str(page))
             soup = BeautifulSoup(r.content, "html.parser")
+
             ancher = soup.find('div', {'class': '-paxs row _no-g _4cl-3cm-shs'}
                                ).find_all('article', {'class': 'prd _fb col c-prd'})
 
-            ancher2= soup.find('div',{'class':'brcbs col16 -pvs'}).find_all('a', {'class': 'cbs'})
+            ancher2 = soup.find('div', {'class': 'brcbs col16 -pvs'}).find_all('a', {'class': 'cbs'})
 
             for pt in ancher:
                 img = pt.find('a').find(
@@ -49,10 +63,11 @@ def look_for_brands(brands):
                 columns['product_type'].append(ancher2[1].text)
                 columns['category'].append(ancher2[2].text)
                 columns['sub_category'].append(ancher2[3].text)
-                columns['brand'].append(ancher2[4].text)
+                columns['sub_sub_category'].append(ancher2[4].text)
+                columns['brand'].append(ancher2[5].text)
                 columns['name'].append(name.text)
                 columns['price'].append(price.text)
-                if(old_price is not None):
+                if (old_price is not None):
                     columns['old_price'].append(old_price.contents[0].text)
                     columns['percentage'].append(old_price.contents[1].text)
                 else:
@@ -60,12 +75,13 @@ def look_for_brands(brands):
                     columns['percentage'].append('')
                 columns['img url'].append(img.get('data-src'))
 
-
         data = pd.DataFrame(columns)
-        data.to_excel('jumia_eau_de_javel.xlsx')
+        data.to_excel('jumia_ingredients-cuisson-epices.xlsx')
+
 
 def main():
-    look_for_brands(brands)
+    look_for_brands()
+    look_for_products(brands_list)
 
 
 if __name__ == '__main__':
