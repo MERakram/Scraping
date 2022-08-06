@@ -6,23 +6,22 @@ import pandas as pd
 from jumia_model import Brand
 import re
 
-brands = [
-    Brand('amir', 1),
-    Brand('bingo', 1),
-    Brand('force-xpress', 1),
-    Brand('life', 1),
-    Brand('omo', 1),
-    Brand('test', 1),
-    Brand('topsil', 1),
-]
 brands_list=[]
 
 base_url='https://www.jumia.dz/'
-url2=base_url+'ingredients-cuisson-epices/'
 
-columns = {'product_type': [], 'category': [],
+#
+#
+url2=base_url+'sante-beaute-dentifrice/'
+#
+#
+
+columns = {'product_type': [],
+           'category': [],
            'sub_category': [],
-           'sub_sub_category': [],
+           # 'sub_sub_category': [],
+           # 'sub_sub_sub_category': [],
+           # 'sub_sub_sub_sub_category': [],
            'brand': [], 'name': [],'price': [],
            'old_price': [], 'percentage': [], 'img url': [], }
 
@@ -63,8 +62,10 @@ def look_for_products(brands_list):
                 columns['product_type'].append(ancher2[1].text)
                 columns['category'].append(ancher2[2].text)
                 columns['sub_category'].append(ancher2[3].text)
-                columns['sub_sub_category'].append(ancher2[4].text)
-                columns['brand'].append(ancher2[5].text)
+                # columns['sub_sub_category'].append(ancher2[4].text)
+                # columns['sub_sub_sub_category'].append(ancher2[5].text)
+                # columns['sub_sub_sub_sub_category'].append(ancher2[6].text)
+                columns['brand'].append(ancher2[4].text)
                 columns['name'].append(name.text)
                 columns['price'].append(price.text)
                 if (old_price is not None):
@@ -76,7 +77,7 @@ def look_for_products(brands_list):
                 columns['img url'].append(img.get('data-src'))
 
         data = pd.DataFrame(columns)
-        data.to_excel('jumia_ingredients-cuisson-epices.xlsx')
+        data.to_excel('jumia_sante_beaute_dentifrice.xlsx')
 
 
 def main():
